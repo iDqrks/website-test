@@ -46,7 +46,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
     - name: Pull Nikto Docker image
-      run: docker pull sullo/nikto
+      run: docker pull alpine/nikto
 
     - name: Run Nikto Scan
       run: |
