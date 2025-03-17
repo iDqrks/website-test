@@ -42,17 +42,20 @@ jobs:
     - name: Pull Alpine/Nikto Docker image
       run: docker pull alpine/nikto
 
+    - name: Create Output Directory
+      run: mkdir -p reports
+
     - name: Run Nikto Scan with Volume Mount
       run: |
-        docker run --rm -v $(pwd):/output alpine/nikto \
+        docker run --rm -v $(pwd)/reports:/reports alpine/nikto \
           -h http://your-target-url.com \
-          -o /output/nikto_report.html
+          -o /reports/nikto_report.html
 
     - name: Save Nikto Report
       uses: actions/upload-artifact@v4
       with:
         name: nikto-report
-        path: nikto_report.html
+        path: reports/nikto_report.html
         
   deploy:
     runs-on: ubuntu-latest
