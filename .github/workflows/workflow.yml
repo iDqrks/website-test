@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository code into runner
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
       - name: Check HTML and CSS with HTML5 Validator
         uses: Cyb3r-Jak3/html5validator-action@v7.2.0
         with:
@@ -21,11 +21,11 @@ jobs:
     needs: test
     steps:
       - name: Checkout repository code into runner
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
       - name: Build the Docker image
         run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/test-website:latest .
       - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -36,41 +36,39 @@ jobs:
     runs-on: ubuntu-latest
     needs: delivery
     steps:
-    - name: Ensure Docker is installed
-      run: docker --version
+      - name: Checkout repository code into runner
+        uses: actions/checkout@v2
+      - name: Run Arachni Scanner
+        run: |
+          docker run --rm \
+            -v $(pwd)/arachni_report:/home/arachni/reports \
+            arachni/arachni \
+            /usr/local/arachni/bin/arachni https://kind-grass-0fdeb6003.6.azurestaticapps.net/ \
+            --report-save-path=/home/arachni/reports/arachni_report.afr
+      - name: Convert Arachni Report to HTML
+        run: |
+          docker run --rm \
+            -v $(pwd)/arachni_report:/home/arachni/reports \
+            arachni/arachni \
+            /usr/local/arachni/bin/arachni_reporter /home/arachni/reports/arachni_report.afr \
+            --reporter=html:outfile=/home/arachni/reports/arachni_report.html
+      - name: Upload Arachni Scan Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: arachni-scan-report
+          path: arachni_report/arachni_report.html
 
-    - name: Pull Arachni Docker image
-      run: docker pull arachni/arachni
-
-    - name: Run Arachni Scan
-      run: |
-        docker run --rm -v $(pwd):/report arachni/arachni \
-          http://your-target-url.com \
-          --report-save-path=/report/arachni_report.afr
-
-    - name: Generate Arachni Report
-      run: |
-        docker run --rm -v $(pwd):/report arachni/arachni \
-          /report/arachni_report.afr \
-          --reporter=html:outfile=/report/arachni_report.html
-
-    - name: Save Arachni Report
-      uses: actions/upload-artifact@v4
-      with:
-        name: arachni-report
-        path: arachni_report.html
-        
   deploy:
     runs-on: ubuntu-latest
     needs: security_scan
     steps:
       - name: Checkout repository code into runner
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_DEPLOY_TOKEN }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments). Is automatically present as a secret. Not to be added by the user.
           action: "upload"
-          app_location: /
-          skip_app_build: false
+          app_location: / # App source code path
+          skip_app_build: true
