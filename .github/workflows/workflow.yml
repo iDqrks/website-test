@@ -42,7 +42,7 @@ jobs:
           target: 'https://orange-stone-0d1908f03.6.azurestaticapps.net/'  # Replace with your deployed website URL
           fail_action: false  # Change to 'true' if you want the pipeline to fail on vulnerabilities
       - name: Save ZAP Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: zap-report
           path: report.html  # Store the scan results
