@@ -39,23 +39,26 @@ jobs:
     - name: Ensure Docker is installed
       run: docker --version
 
-    - name: Pull Alpine/Nikto Docker image
-      run: docker pull alpine/nikto
+    - name: Pull Arachni Docker image
+      run: docker pull arachni/arachni
 
-    - name: Create Output Directory
-      run: mkdir -p reports
-
-    - name: Run Nikto Scan with Volume Mount
+    - name: Run Arachni Scan
       run: |
-        docker run --rm -v $(pwd)/reports:/reports alpine/nikto \
-          -h http://your-target-url.com \
-          -o /reports/nikto_report.html
+        docker run --rm -v $(pwd):/report arachni/arachni \
+          http://your-target-url.com \
+          --report-save-path=/report/arachni_report.afr
 
-    - name: Save Nikto Report
+    - name: Generate Arachni Report
+      run: |
+        docker run --rm -v $(pwd):/report arachni/arachni \
+          /report/arachni_report.afr \
+          --reporter=html:outfile=/report/arachni_report.html
+
+    - name: Save Arachni Report
       uses: actions/upload-artifact@v4
       with:
-        name: nikto-report
-        path: reports/nikto_report.html
+        name: arachni-report
+        path: arachni_report.html
         
   deploy:
     runs-on: ubuntu-latest
