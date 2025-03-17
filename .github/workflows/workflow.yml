@@ -43,7 +43,7 @@ jobs:
           docker run --rm \
             -v $(pwd)/arachni_report:/home/arachni/reports \
             arachni/arachni \
-            /usr/local/arachni/bin/arachni https://kind-grass-0fdeb6003.6.azurestaticapps.net/ \
+            /usr/local/arachni/bin/arachni https://orange-stone-0d1908f03.6.azurestaticapps.net/ \
             --report-save-path=/home/arachni/reports/arachni_report.afr
       - name: Convert Arachni Report to HTML
         run: |
