@@ -33,32 +33,32 @@ jobs:
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/test-website:latest
 
   security_scan:
-    runs-on: ubuntu-latest
-    needs: delivery
-    steps:
-      - name: Ensure Docker is installed
-        run: docker --version
+  runs-on: ubuntu-latest
+  needs: delivery
+  steps:
+    - name: Ensure Docker is installed
+      run: docker --version
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Pre-pull ZAP Docker image
-        run: docker pull owasp/zap2docker-stable
+    - name: Pull Nikto Docker image
+      run: docker pull sullo/nikto
 
-      - name: OWASP ZAP Full Scan
-        uses: zaproxy/action-full-scan@v0.4.0
-        with:
-          target: 'https://orange-stone-0d1908f03.6.azurestaticapps.net/'
-          fail_action: false  # Prevents workflow failure on vulnerabilities
+    - name: Run Nikto Scan
+      run: |
+        docker run --rm sullo/nikto \
+          -h http://your-target-url.com \
+          -o nikto_report.html
 
-      - name: Save ZAP Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: zap-report
-          path: report.html
+    - name: Save Nikto Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: nikto-report
+        path: nikto_report.html
 
   deploy:
     runs-on: ubuntu-latest
