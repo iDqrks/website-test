@@ -45,8 +45,8 @@ jobs:
       - name: OWASP ZAP Full Scan
         uses: zaproxy/action-full-scan@v0.4.0
         with:
-          target: 'https://orange-stone-0d1908f03.6.azurestaticapps.net/'  # Replace with your deployed website URL
-          fail_action: false  # Change to 'true' if you want the pipeline to fail on vulnerabilities
+          target: 'https://orange-stone-0d1908f03.6.azurestaticapps.net/'
+          fail_action: false  # Prevents workflow failure on vulnerabilities
 
       - name: Save ZAP Report
         uses: actions/upload-artifact@v4
